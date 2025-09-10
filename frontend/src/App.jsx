@@ -44,15 +44,16 @@ export default function App() {
 
   useEffect(() => {
     if (!user) return;
-    // fetch list
+
     fetch(API + "/api/documents")
       .then((r) => r.json())
       .then(setDocs);
-    // connect socket
+
     const socket = io(API, {
       auth: { userId: user.userId, username: user.username },
     });
     socketRef.current = socket;
+
     socket.on("connect", () => console.log("connected", socket.id));
     socket.on("presence:update", ({ participants }) =>
       setParticipants(participants)
@@ -63,15 +64,13 @@ export default function App() {
       if (editorRef.current) editorRef.current.innerText = content;
     });
     socket.on("chat_message", (msg) => setChat((prev) => [...prev, msg]));
-    socket.on("cursor_update", ({ userId, username, cursor }) => {
-      // for demo: we won't render caret positions accurately; could show username in list
-    });
     socket.on("sync_required", (snapshot) => {
       setContent(snapshot.content || "");
       setVersion(snapshot.version || 0);
       if (editorRef.current)
         editorRef.current.innerText = snapshot.content || "";
     });
+
     return () => socket.disconnect();
   }, [user]);
 
@@ -89,7 +88,6 @@ export default function App() {
 
   async function openDoc(doc) {
     setSelected(doc);
-    // join via socket
     socketRef.current.emit("join_document", { documentId: doc.id }, (resp) => {
       if (!resp.ok) return alert(resp.error || "failed to join");
       setContent(resp.document.content || "");
@@ -104,12 +102,13 @@ export default function App() {
     const text = editorRef.current.innerText;
     socketRef.current.emit(
       "editor_change",
-      { documentId: selected.id, content: text, clientVersion: version },
+      {
+        documentId: selected.id,
+        content: text,
+        clientVersion: version,
+      },
       (ack) => {
         if (ack && ack.ok) setVersion(ack.version);
-        else if (ack && ack.error === "version_mismatch") {
-          // request sync, server will send sync_required
-        }
       }
     );
   }
@@ -169,10 +168,7 @@ export default function App() {
               <div
                 ref={editorRef}
                 contentEditable
-                onInput={() => {
-                  // naive: on every input, we set local content but do not spam server
-                  setContent(editorRef.current.innerText);
-                }}
+                onInput={() => setContent(editorRef.current.innerText)}
                 style={{
                   minHeight: 300,
                   border: "1px solid #ccc",
