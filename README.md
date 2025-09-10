@@ -1,4 +1,4 @@
-# RT Collab Editor - Minimal Demo
+# Real Time Collab Editor
 
 A real-time collaborative document editor with live chat functionality, built with Node.js, Socket.IO, and Redis.
 
@@ -89,18 +89,6 @@ The frontend will be available at `http://localhost:5173` (or the URL shown in t
 4. Create or open a document
 5. Test real-time editing and chat functionality
 
-## Development Notes
-
-- This is a minimal implementation focused on demonstrating core functionality
-- Built as a 3-day proof of concept - **not production ready**
-- Missing production features:
-  - Authentication tokens
-  - Input sanitization
-  - Error handling
-  - Rate limiting
-  - SSL/TLS
-  - Proper logging
-
 ## Docker Services
 
 The `docker-compose.yml` includes:
@@ -155,14 +143,3 @@ rt-collab-editor/
 ├── docker-compose.yml
 └── README.md
 ```
-
-## Contributing
-
-This is a minimal demo project. For production use, consider implementing:
-
-- Proper authentication and authorization
-- Input validation and sanitization
-- Comprehensive error handling
-- Performance optimizations
-- Security hardening
-- Automated testing
