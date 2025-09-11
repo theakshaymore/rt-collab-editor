@@ -33,13 +33,27 @@ app.post("/api/login", async (req, res) => {
     "SELECT id, username FROM users WHERE username = $1",
     [username]
   );
-  if (r.rows.length)
-    return res.json({ userId: r.rows[0].id, username: r.rows[0].username });
-  const ins = await db.query(
-    "INSERT INTO users (username) VALUES ($1) RETURNING id, username",
-    [username]
-  );
-  return res.json({ userId: ins.rows[0].id, username: ins.rows[0].username });
+  let user;
+  if (r.rows.length) {
+    user = r.rows[0];
+  } else {
+    const ins = await db.query(
+      "INSERT INTO users (username) VALUES ($1) RETURNING id, username",
+      [username]
+    );
+    user = ins.rows[0];
+  }
+
+  // store mapping in Redis for quick username lookup from userId
+  try {
+    await redis.set(`user:name:${user.id}`, user.username);
+    // optional: set a TTL if you want ephemeral mapping, e.g. 7 days
+    // await redis.expire(`user:name:${user.id}`, 60 * 60 * 24 * 7);
+  } catch (e) {
+    console.warn("redis set user name failed", e.message);
+  }
+
+  return res.json({ userId: user.id, username: user.username });
 });
 
 app.post("/api/documents", async (req, res) => {
