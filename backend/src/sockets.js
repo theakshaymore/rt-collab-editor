@@ -6,6 +6,24 @@ module.exports = (io, { db, redis }) => {
   const pendingSaveTimers = {}; // docId -> timeout
   const latestDocCache = {}; // docId -> { content, version }
 
+  // helper to fetch usernames for a list of userIds (returns array of {id, username})
+  async function buildParticipantsList(redisClient, userIds) {
+    if (!userIds || userIds.length === 0) return [];
+    const keys = userIds.map((id) => `user:name:${id}`);
+    // mget returns array of values (or null) in same order
+    let names;
+    try {
+      names = await redisClient.mget(...keys);
+    } catch (e) {
+      console.warn("redis mget failed", e.message);
+      // fallback: return ids as username
+      return userIds.map((id) => ({ id, username: id }));
+    }
+    return userIds.map((id, idx) => {
+      return { id, username: names && names[idx] ? names[idx] : id };
+    });
+  }
+
   io.on("connection", (socket) => {
     // expect { userId, username } in auth
     const { userId, username } = socket.handshake.auth || {};
@@ -26,11 +44,15 @@ module.exports = (io, { db, redis }) => {
         );
         if (!r.rows.length)
           return ack && ack({ ok: false, error: "document not found" });
+
         socket.join(`doc:${documentId}`);
+
         // add to presence set
         await redis.sadd(`presence:doc:${documentId}`, userId);
-        // fetch presence list
-        const participants = await redis.smembers(`presence:doc:${documentId}`);
+
+        // build participants list with usernames
+        const ids = await redis.smembers(`presence:doc:${documentId}`);
+        const participants = await buildParticipantsList(redis, ids);
         io.to(`doc:${documentId}`).emit("presence:update", { participants });
 
         // load snapshot (prefer in-memory cache -> redis -> db)
@@ -59,10 +81,11 @@ module.exports = (io, { db, redis }) => {
     socket.on("leave_document", async ({ documentId }) => {
       socket.leave(`doc:${documentId}`);
       await redis.srem(`presence:doc:${documentId}`, userId);
-      const parts = await redis.smembers(`presence:doc:${documentId}`);
-      io.to(`doc:${documentId}`).emit("presence:update", {
-        participants: parts,
-      });
+
+      // build participants list with usernames
+      const ids = await redis.smembers(`presence:doc:${documentId}`);
+      const participants = await buildParticipantsList(redis, ids);
+      io.to(`doc:${documentId}`).emit("presence:update", { participants });
     });
 
     socket.on(

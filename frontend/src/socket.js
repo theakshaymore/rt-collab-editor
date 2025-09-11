@@ -1,3 +1,4 @@
+// simple singleton socket helper
 import { io } from "socket.io-client";
 
 let socket = null;
