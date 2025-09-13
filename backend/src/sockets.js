@@ -204,5 +204,19 @@ module.exports = (io, { db, redis }) => {
       await redis.srem("active_users", userId);
       // NOTE: presence per document will be cleared by TTL or when users explicitly leave in demo
     });
+
+    socket.on("typing", async ({ documentId, typing }) => {
+      try {
+        // broadcast who is typing to the document room
+        io.to(`doc:${documentId}`).emit("typing:update", {
+          userId,
+          username,
+          typing: !!typing,
+          ts: Date.now(),
+        });
+      } catch (e) {
+        console.warn("typing handler error", e && e.message);
+      }
+    });
   });
 };
