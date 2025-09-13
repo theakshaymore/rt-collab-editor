@@ -1,22 +1,29 @@
 import React from "react";
 
+function initials(name) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function PresenceList({ participants = [] }) {
-  if (!participants || participants.length === 0) {
+  if (!participants || participants.length === 0)
     return <div className="text-muted">No one online</div>;
-  }
   return (
-    <ul className="list-unstyled mb-0">
+    <div>
       {participants.map((p) => (
-        <li key={p.id} className="mb-1 d-flex align-items-center">
-          <span className="badge bg-light text-dark me-2" title={p.id}>
-            {p.username ? p.username.charAt(0).toUpperCase() : "U"}
-          </span>
+        <div key={p.id || p} className="presence-item">
+          <div className="presence-avatar">{initials(p.username || p)}</div>
           <div>
-            <div className="fw-semibold">{p.username || p.id}</div>
-            <div className="small text-muted">{p.id}</div>
+            <div style={{ fontWeight: 600 }}>{p.username || p}</div>
+            <div className="small-muted">{p.id}</div>
           </div>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

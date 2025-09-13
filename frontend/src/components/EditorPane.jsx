@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 export default function EditorPane({ api, user, documentMeta, socket }) {
   const editorRef = useRef();
   const [version, setVersion] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!documentMeta || !socket) return;
@@ -11,7 +12,6 @@ export default function EditorPane({ api, user, documentMeta, socket }) {
       editorRef.current.innerText = resp.document.content || "";
       setVersion(resp.document.version || 0);
     });
-    // cleanup handled in parent on close
   }, [documentMeta, socket]);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function EditorPane({ api, user, documentMeta, socket }) {
       setVersion(snapshot.version || 0);
     });
     return () => {
-      socket.off("editor_patch");
+      socket.off("editor_patch", onPatch);
       socket.off("sync_required");
     };
   }, [socket]);
@@ -35,42 +35,39 @@ export default function EditorPane({ api, user, documentMeta, socket }) {
   const sendEdit = () => {
     const text = editorRef.current.innerText;
     if (!socket) return;
+    setSaving(true);
     socket.emit(
       "editor_change",
       { documentId: documentMeta.id, content: text, clientVersion: version },
       (ack) => {
+        setSaving(false);
         if (ack && ack.ok) setVersion(ack.version);
-        else if (ack && ack.error === "version_mismatch") {
-          // server will send sync_required
-        }
       }
     );
   };
 
   return (
     <div>
-      <div className="mb-2">
-        <small className="text-muted">
+      <div className="mb-2 d-flex justify-content-between">
+        <div className="small-muted">
           Editing as <strong>{user.username}</strong>
-        </small>
+        </div>
+        <div>
+          <button className="btn btn-sm btn-outline-soft me-2">Share</button>
+          <button className={`btn btn-sm btn-brand`} onClick={sendEdit}>
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
 
       <div
         ref={editorRef}
         contentEditable
-        className="form-control"
-        style={{ minHeight: 320, whiteSpace: "pre-wrap", overflowY: "auto" }}
+        className="editor"
+        suppressContentEditableWarning
         onInput={() => {}}
       />
-
-      <div className="mt-2 d-flex justify-content-between">
-        <div className="text-muted">Version: {version}</div>
-        <div>
-          <button className="btn btn-sm btn-primary me-2" onClick={sendEdit}>
-            Save
-          </button>
-        </div>
-      </div>
+      <div className="small-muted mt-2">Version: {version}</div>
     </div>
   );
 }

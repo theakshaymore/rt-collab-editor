@@ -1,1 +1,186 @@
-/* @import "tailwindcss"; */
+/* index.css — global design tokens & styles */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+:root {
+  --bg: #f6f8fb;
+  --panel: #ffffff;
+  --muted: #6b7280;
+  --accent: #6d28d9; /* purple/indigo */
+  --accent-2: #06b6d4; /* teal */
+  --card-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  --glass: rgba(255, 255, 255, 0.6);
+}
+
+/* base */
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+  color: #0f172a;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* layout */
+.app-shell {
+  display: flex;
+  height: 100vh;
+}
+.sidebar {
+  width: 320px;
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.9)
+  );
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+}
+.main {
+  flex: 1;
+  padding: 24px;
+  overflow: auto;
+}
+
+/* header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand .logo {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.18);
+}
+
+/* doc list */
+.doc-card {
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--card-shadow);
+  padding: 12px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.doc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+}
+
+.doc-title {
+  font-weight: 600;
+}
+.doc-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* editor */
+.editor {
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 320px;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 250, 255, 1),
+    rgba(245, 247, 250, 1)
+  );
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  box-shadow: var(--card-shadow);
+  white-space: pre-wrap;
+  overflow: auto;
+}
+.editor[contenteditable="true"]:focus {
+  outline: 2px solid rgba(109, 40, 217, 0.08);
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.06);
+}
+
+/* chat */
+.chat-box {
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  box-shadow: var(--card-shadow);
+  height: 360px;
+  overflow: auto;
+}
+.chat-msg {
+  margin-bottom: 10px;
+}
+.chat-msg .meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+.chat-input {
+  border-radius: 10px;
+}
+
+/* presence */
+.presence-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  border-radius: 8px;
+}
+.presence-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 12px rgba(16, 24, 40, 0.06);
+  font-size: 14px;
+}
+
+/* buttons */
+.btn-brand {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  border: none;
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.12);
+}
+.btn-outline-soft {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: transparent;
+}
+
+/* small helpers */
+.small-muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+  .main {
+    padding: 16px;
+  }
+}

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function ChatPanel({ api, user, documentMeta, socket }) {
   const [chat, setChat] = useState([]);
   const [input, setInput] = useState("");
+  const scrollRef = useRef();
 
   useEffect(() => {
     if (!documentMeta) return;
@@ -19,6 +20,11 @@ export default function ChatPanel({ api, user, documentMeta, socket }) {
     return () => socket.off("chat_message", onMsg);
   }, [socket]);
 
+  useEffect(() => {
+    if (scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [chat]);
+
   const sendChat = () => {
     if (!input.trim()) return;
     socket.emit(
@@ -34,15 +40,14 @@ export default function ChatPanel({ api, user, documentMeta, socket }) {
   return (
     <div>
       <h6 className="mb-2">Chat</h6>
-      <div
-        className="border rounded p-2 mb-2"
-        style={{ height: 300, overflowY: "auto" }}
-      >
+      <div className="chat-box mb-2" ref={scrollRef}>
         {chat.map((m) => (
-          <div key={m.id} className="mb-2">
-            <div className="small text-muted">
-              {m.username || "anon"} •{" "}
-              <small>{new Date(m.created_at).toLocaleString()}</small>
+          <div key={m.id} className="chat-msg">
+            <div className="d-flex justify-content-between">
+              <div className="fw-semibold">{m.username || "anon"}</div>
+              <div className="small-muted">
+                {new Date(m.created_at).toLocaleTimeString()}
+              </div>
             </div>
             <div>{m.body}</div>
           </div>
@@ -51,12 +56,12 @@ export default function ChatPanel({ api, user, documentMeta, socket }) {
 
       <div className="d-flex gap-2">
         <input
-          className="form-control"
+          className="form-control chat-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message"
+          placeholder="Write a message..."
         />
-        <button className="btn btn-primary" onClick={sendChat}>
+        <button className="btn btn-brand" onClick={sendChat}>
           Send
         </button>
       </div>
