@@ -7,7 +7,7 @@ import ChatPanel from "./components/ChatPanel";
 import PresenceList from "./components/PresenceList";
 import "./index.css";
 
-const DEFAULT_API = "http://localhost:4001";
+const DEFAULT_API = "http://localhost:4000";
 
 export default function App() {
   const [api] = useState(DEFAULT_API);
