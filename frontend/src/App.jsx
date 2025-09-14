@@ -7,7 +7,7 @@ import ChatPanel from "./components/ChatPanel";
 import PresenceList from "./components/PresenceList";
 import "./index.css";
 
-const DEFAULT_API = "http://localhost:4000";
+const DEFAULT_API = import.meta.env.VITE_API_URL || "https://rt-collab-editor-backend.onrender.com";
 
 export default function App() {
   const [api] = useState(DEFAULT_API);
